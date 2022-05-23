@@ -20,14 +20,25 @@ class Player(arcade.Sprite):
         super().__init__("Images/bb8.png", BB8_scale)
         self.laser_sound = arcade.load_sound("sounds/laser.mp3")
     def update(self):
-        pass
+        self.center_x+=self.change_x
+        self.center_y+=self.change_y
+        if self.left <= 0:
+            self.left = 0
+        if self.right >= SW:
+            self.right = SW
+        if self.bottom <= 0:
+            self.bottom = 0
+        if self.top >= SH:
+            self.top = SH
+
 
 class Trooper(arcade.Sprite):
     def __init__(self):
-        super().__init__("Images/stormtrooper.png")
-        self.w=int(self.w)
-        self.h = int(self.h)
-
+        super().__init__("Images/stormtrooper.png", trooper_scale)
+        self.w=int(self.width)
+        self.h = int(self.height)
+    def update(self):
+        pass
 
 
 
@@ -59,6 +70,7 @@ class MyGame(arcade.Window):
             trooper = Trooper()
             trooper.center_x = random.randrange(trooper.w,SW-trooper.w)
             trooper.center_y = random.randrange(trooper.h,SH-trooper.h)
+            self.trooper_list.append(trooper)
 
     def on_draw(self):
         arcade.start_render()
@@ -74,24 +86,42 @@ class MyGame(arcade.Window):
         trooper_hit_list = arcade.check_for_collision_with_list(self.BB8,self.trooper_list)
         for trooper in trooper_hit_list:
             trooper.kill()
-            arcade.play_sound(self.BB8)
+            arcade.play_sound(self.BB8.laser_sound)
             self.score+=1
 
-        if self.score == self.trooper_count:
+        if self.score == trooper_count:
             self.reset()
 
 
-    def on_mouse_motion(self, x: float, y: float, dx: float, dy: float):
-        self.BB8.center_x = x
-        self.BB8.center_y = y
+
+
+    def on_key_press(self, key, modifiers):
+
+        if key == arcade.key.UP:
+            self.BB8.change_y=SP
+        elif key == arcade.key.DOWN:
+            self.BB8.change_y=-SP
+        elif key == arcade.key.RIGHT:
+            self.BB8.change_x=SP
+        elif key == arcade.key.LEFT:
+            self.BB8.change_x = -SP
+
+    def on_key_release(self, key, modifiers):
+        if key == arcade.key.UP or key == arcade.key.DOWN:
+            self.BB8.change_y=0
+        elif key == arcade.key.RIGHT or key == arcade.key.LEFT:
+            self.BB8.change_x=0
+
 
 
 #-----Main Function--------
 def main():
     window = MyGame(SW,SH,"BB8 Attack")
+    window.reset()
     arcade.run()
 
 
 #------Run Main Function-----
 if __name__ == "__main__":
     main()
+
